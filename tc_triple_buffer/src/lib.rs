@@ -54,8 +54,8 @@ where
     }
 }
 
-impl<T> TripleBuffer<T> {
-    pub fn pub_sub(&self) -> (TripleBufferProducer<T>, TripleBufferConsumer<T>) {
+impl<'a, T> TripleBuffer<T> {
+    pub fn pub_sub(&'a self) -> (TripleBufferProducer<'a, T>, TripleBufferConsumer<'a, T>) {
         (
             TripleBufferProducer::new(self),
             TripleBufferConsumer::new(self),
@@ -87,6 +87,9 @@ impl<'a, T> TripleBufferProducer<'a, T> {
     }
 }
 
+unsafe impl<'a, T> Send for TripleBufferProducer<'a, T> where T: Send {}
+unsafe impl<'a, T> Sync for TripleBufferProducer<'a, T> where T: Sync {}
+
 pub struct TripleBufferConsumer<'a, T> {
     src: &'a TripleBuffer<T>,
     fwd: usize,
@@ -112,12 +115,17 @@ impl<'a, T> TripleBufferConsumer<'a, T> {
     }
 }
 
+unsafe impl<'a, T> Send for TripleBufferConsumer<'a, T> where T: Send {}
+unsafe impl<'a, T> Sync for TripleBufferConsumer<'a, T> where T: Sync {}
+
 #[cfg(test)]
 mod test {
+    use std::thread;
+
     use super::*;
 
     #[test]
-    fn construct_buffer() {
+    fn single_thread() {
         let buffer = TripleBuffer::<u64>::default();
         let (mut publisher, mut sub) = buffer.pub_sub();
 
@@ -127,5 +135,29 @@ mod test {
         publisher.commit();
 
         assert_eq!(*sub.data(), 42);
+    }
+
+    #[test]
+    fn multi_threaded() {
+        let buffer = TripleBuffer::<u64>::default();
+        {
+            let (mut publisher, mut sub) = buffer.pub_sub();
+
+            let producer = thread::spawn(move || {
+                for i in 1..1000 {
+                    *publisher.data() = i;
+                    publisher.commit();
+                }
+            });
+
+            let mut prev = 0;
+            while prev != 999 {
+                let next = *sub.data();
+                assert!(prev <= next);
+                prev = next;
+            }
+
+            let _ = producer.join();
+        }
     }
 }
