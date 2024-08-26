@@ -11,6 +11,37 @@ pub use crate::{consumer::*, producer::*};
 
 pub(crate) const DIRTY: u8 = 0x8;
 
+/// A triple-buffer pattern implementation for safely sharing data between producers and consumers.
+///
+/// The `TripleBuffer` provides a way for multiple threads to communicate through a set of buffers.
+/// This pattern allows one thread to write data while another reads from it, with an additional
+/// buffer to help with synchronization.
+///
+/// # Examples
+///
+/// ```rust
+/// use tc_triple_buffer::*; 
+/// use std::thread;
+///
+/// // Assuming the TripleBuffer struct and associated types are defined elsewhere
+/// let TripleBuffer::<u64>(mut publisher, mut subscriber) = TripleBuffer::default();
+///
+/// let producer = thread::spawn(move || {
+///     for i in 1..1000 {
+///         *publisher.data() = i;
+///         publisher.commit();
+///     }
+/// });
+///
+/// let mut prev = 0;
+/// while prev != 999 {
+///     let next = *subscriber.data();
+///     assert!(prev <= next);
+///     prev = next;
+/// }
+///
+/// let _ = producer.join();
+/// ```
 pub struct TripleBuffer<T>(pub TripleBufferProducer<T>, pub TripleBufferConsumer<T>);
 
 impl<T> Default for TripleBuffer<T>
