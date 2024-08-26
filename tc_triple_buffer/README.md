@@ -52,3 +52,9 @@ fn main() {
 }
 ```
 
+## Testing
+
+To test the validity of the threading model it was tested with a [thread 
+sanitizer](https://doc.rust-lang.org/nightly/unstable-book/compiler-flags/sanitizer.html#threadsanitizer).
+
+
