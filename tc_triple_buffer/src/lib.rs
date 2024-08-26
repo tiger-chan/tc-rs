@@ -23,7 +23,6 @@ pub(crate) const DIRTY: u8 = 0x8;
 /// use tc_triple_buffer::*; 
 /// use std::thread;
 ///
-/// // Assuming the TripleBuffer struct and associated types are defined elsewhere
 /// let TripleBuffer::<u64>(mut publisher, mut subscriber) = TripleBuffer::default();
 ///
 /// let producer = thread::spawn(move || {
