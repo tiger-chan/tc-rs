@@ -71,7 +71,7 @@ mod test {
 
     #[test]
     fn single_thread() {
-        let TripleBuffer::<u64>(mut publisher, mut sub) = TripleBuffer::default();
+        let TripleBuffer::<u64>(mut publisher, sub) = TripleBuffer::default();
 
         *publisher.data() = 42;
 
@@ -83,7 +83,7 @@ mod test {
 
     #[test]
     fn multi_threaded() {
-        let TripleBuffer::<u64>(mut publisher, mut sub) = TripleBuffer::default();
+        let TripleBuffer::<u64>(mut publisher, sub) = TripleBuffer::default();
 
         let producer = thread::spawn(move || {
             for i in 1..1000 {

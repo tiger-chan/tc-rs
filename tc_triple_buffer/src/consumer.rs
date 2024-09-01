@@ -1,4 +1,7 @@
-use std::sync::{atomic::Ordering, Arc};
+use std::{
+    cell::RefCell,
+    sync::{atomic::Ordering, Arc},
+};
 
 use crate::{Buffer, State, DIRTY};
 
@@ -13,12 +16,15 @@ pub struct TripleBufferConsumer<T> {
     src: Arc<State<T>>,
     /// The index of the forward buffer, which contains the data that is being
     /// read.
-    fwd: u8,
+    fwd: RefCell<u8>,
 }
 
 impl<T> TripleBufferConsumer<T> {
     pub(crate) fn new(src: Arc<State<T>>) -> Self {
-        Self { src, fwd: 2 }
+        Self {
+            src,
+            fwd: RefCell::new(2),
+        }
     }
 
     /// Provides immutable access to the data in the current forward buffer.
@@ -29,14 +35,14 @@ impl<T> TripleBufferConsumer<T> {
     ///
     /// # Returns
     /// A reference to the data in the current forward buffer.
-    pub fn data(&mut self) -> &T {
+    pub fn data(&self) -> &T {
         let mid = self.src.mid.load(Ordering::Relaxed);
         if mid & DIRTY == DIRTY {
-            let fwd = self.fwd;
-            self.fwd = self.src.mid.swap(fwd, Ordering::AcqRel) & !DIRTY;
+            let fwd = *self.fwd.borrow();
+            *self.fwd.borrow_mut() = self.src.mid.swap(fwd, Ordering::AcqRel) & !DIRTY;
         }
 
-        let fwd = self.fwd;
+        let fwd = *self.fwd.borrow();
         unsafe {
             let bufs: &[Buffer<T>; 3] = &*self.src.bufs.get();
             &bufs[fwd as usize]
