@@ -2,6 +2,7 @@ use std::{cell::UnsafeCell, sync::atomic::AtomicU8};
 
 use crate::aligned_buffer::*;
 
+#[derive(Debug)]
 pub(crate) struct State<T> {
     pub(crate) bufs: UnsafeCell<[Buffer<T>; 3]>,
     pub(crate) mid: AtomicU8,

@@ -9,6 +9,7 @@ use crate::{Buffer, State, DIRTY};
 ///
 /// # Type Parameters
 /// - `T`: The type of data stored in the triple buffer.
+#[derive(Debug)]
 pub struct TripleBufferProducer<T> {
     // Shared state that holds the three buffers and their current state.
     src: Arc<State<T>>,

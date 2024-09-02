@@ -1,6 +1,7 @@
 use std::ops::{Deref, DerefMut};
 
 #[repr(align(64))]
+#[derive(Debug)]
 pub(crate) struct Buffer<T>(pub(crate) T);
 
 impl<T> Default for Buffer<T>

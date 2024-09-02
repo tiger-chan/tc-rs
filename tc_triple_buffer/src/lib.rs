@@ -41,6 +41,7 @@ pub(crate) const DIRTY: u8 = 0x8;
 ///
 /// let _ = producer.join();
 /// ```
+#[derive(Debug)]
 pub struct TripleBuffer<T>(pub TripleBufferProducer<T>, pub TripleBufferConsumer<T>);
 
 impl<T> Default for TripleBuffer<T>
