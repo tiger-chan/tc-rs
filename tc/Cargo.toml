@@ -5,3 +5,4 @@ edition = "2021"
 
 [dependencies]
 tc_triple_buffer = { path = "../tc_triple_buffer" }
+tc_prng = { path = "../tc_prng" }

@@ -2,8 +2,7 @@
 
 resolver = "2"
 
-members = ["tc"
-, "tc_triple_buffer"]
+members = ["tc", "tc_prng", "tc_triple_buffer"]
 
 [workspace.dependencies]
 
@@ -12,5 +11,3 @@ opt-level = 0
 
 [profile.dev.package."*"]
 opt-level = 3
-
-
