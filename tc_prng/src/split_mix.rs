@@ -1,28 +1,29 @@
-use crate::{prng_128::Prng128, prng_32::Prng32, prng_64::Prng64};
+use crate::{prng_128 as p128, prng_32 as p32, prng_64 as p64};
 
 pub fn split_mix<T>(seed: T) -> SplitMix<T> {
     SplitMix::new(seed)
 }
 
+#[derive(Copy, Clone, Ord, PartialOrd, PartialEq, Eq)]
 pub struct SplitMix<T> {
     state: T,
 }
 
 impl Default for SplitMix<u32> {
     fn default() -> Self {
-        Self{ state: 0 }
+        Self { state: 0 }
     }
 }
 
 impl Default for SplitMix<u64> {
     fn default() -> Self {
-        Self{ state: 0 }
+        Self { state: 0 }
     }
 }
 
 impl Default for SplitMix<u128> {
     fn default() -> Self {
-        Self{ state: 0 }
+        Self { state: 0 }
     }
 }
 
@@ -39,6 +40,13 @@ impl SplitMix<u32> {
     const SH1: usize = 15;
     const SH2: usize = 13;
     const SH3: usize = 16;
+
+    pub fn next<V>(&mut self) -> V
+    where
+        Self: p32::Prng<V>,
+    {
+        p32::Prng::next_val(self)
+    }
 }
 
 impl SplitMix<u64> {
@@ -48,6 +56,13 @@ impl SplitMix<u64> {
     const SH1: usize = 30;
     const SH2: usize = 27;
     const SH3: usize = 31;
+
+    pub fn next<V>(&mut self) -> V
+    where
+        Self: p64::Prng<V>,
+    {
+        p64::Prng::next_val(self)
+    }
 }
 
 impl SplitMix<u128> {
@@ -57,9 +72,16 @@ impl SplitMix<u128> {
     const SH1: usize = 60;
     const SH2: usize = 54;
     const SH3: usize = 62;
+
+    pub fn next<V>(&mut self) -> V
+    where
+        Self: p128::Prng<V>,
+    {
+        p128::Prng::next_val(self)
+    }
 }
 
-impl Prng32 for SplitMix<u32> {
+impl p32::Prng32 for SplitMix<u32> {
     fn calc(&mut self) -> u32 {
         self.state = self.state.wrapping_add(Self::ADD);
         let z = self.state;
@@ -69,7 +91,7 @@ impl Prng32 for SplitMix<u32> {
     }
 }
 
-impl Prng64 for SplitMix<u64> {
+impl p64::Prng64 for SplitMix<u64> {
     fn calc(&mut self) -> u64 {
         self.state = self.state.wrapping_add(Self::ADD);
         let z = self.state;
@@ -79,7 +101,7 @@ impl Prng64 for SplitMix<u64> {
     }
 }
 
-impl Prng128 for SplitMix<u128> {
+impl p128::Prng128 for SplitMix<u128> {
     fn calc(&mut self) -> u128 {
         self.state = self.state.wrapping_add(Self::ADD);
         let z = self.state;
@@ -92,3 +114,25 @@ impl Prng128 for SplitMix<u128> {
 pub type SplitMix32 = SplitMix<u32>;
 pub type SplitMix64 = SplitMix<u64>;
 pub type SplitMix128 = SplitMix<u128>;
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn dump_value_types() {
+        let mut rng = SplitMix::new(123456_u64);
+
+        let a: u8 = rng.next();
+        assert_eq!(a, 230);
+
+        let b: u128 = rng.next();
+        assert_eq!(b, 200611180297160101390585888926671092745);
+
+        let c: bool = rng.next();
+        assert_eq!(c, false);
+
+        let d: f32 = rng.next();
+        assert_eq!(d, 0.20730236);
+    }
+}
