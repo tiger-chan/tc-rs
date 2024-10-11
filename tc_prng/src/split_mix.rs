@@ -4,7 +4,7 @@ pub fn split_mix<T>(seed: T) -> SplitMix<T> {
     SplitMix::new(seed)
 }
 
-#[derive(Copy, Clone, Ord, PartialOrd, PartialEq, Eq)]
+#[derive(Debug, Copy, Clone, Ord, PartialOrd, PartialEq, Eq)]
 pub struct SplitMix<T> {
     state: T,
 }

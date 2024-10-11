@@ -35,7 +35,7 @@ where
     Xorshiro::<T>::new(seed)
 }
 
-#[derive(Copy, Clone, Ord, PartialOrd, PartialEq, Eq)]
+#[derive(Debug, Copy, Clone, Ord, PartialOrd, PartialEq, Eq)]
 pub struct Xorshiro<T> {
     seed: T,
 }
